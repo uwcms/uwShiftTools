@@ -1,0 +1,34 @@
+#!/usr/bin/env python
+import argparse
+import calol1.omds as db
+
+def main():
+    parser = argparse.ArgumentParser(description='Reads L1 Calo Masks from OMDS')
+    subparsers = parser.add_subparsers(help='sub-command help', dest='action')
+    listAction = subparsers.add_parser('list', help='List masks present in OMDS')
+    readAction = subparsers.add_parser('read', help='Read mask key and do things to it')
+    readAction.add_argument('key')
+    readAction.add_argument('--xml-only', action='store_true', help='Only print XML file, no key information')
+    args = parser.parse_args()
+
+    db.connect()
+
+    if args.action == 'list':
+        print 'Keys currently in CALOL1_RS table:'
+        for key in db.list_rs_keys():
+            print key
+    elif args.action == 'read':
+        record = db.get_rs_key(args.key)
+        if not args.xml_only:
+            print "Key:        ", record['id']
+            print "Created on: ", record['creation_date'].strftime('%c')
+            print "Created by: ", record['author']
+            print "Description:", record['description']
+            print
+        print record['conf']
+
+
+if __name__ == '__main__':
+    main()
+
+# vim: set ts=4 sw=4 tw=0 et :
