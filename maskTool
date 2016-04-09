@@ -1,17 +1,35 @@
 #!/usr/bin/env python
 import argparse
-import calol1.omds as db
+from calol1 import caloTower
+import sys
+from xml.dom import minidom as dom
+from xml.dom import Node
+from xml.dom.ext import PrettyPrint
+
+try:
+    import calol1.omds as db
+except ImportError:
+    print "Could not load OMDS library, going into offline mode."
+    print "Note: OMDS only available from P5 machines"
+
 
 def main():
     parser = argparse.ArgumentParser(description='Reads L1 Calo Masks from OMDS')
     subparsers = parser.add_subparsers(help='sub-command help', dest='action')
-    listAction = subparsers.add_parser('list', help='List masks present in OMDS')
-    readAction = subparsers.add_parser('read', help='Read mask key and do things to it')
-    readAction.add_argument('key')
-    readAction.add_argument('--xml-only', action='store_true', help='Only print XML file, no key information')
+    modifyAction = subparsers.add_parser('modify', help='Modify xml mask file')
+    modifyAction.add_argument('file', type=argparse.FileType('r'))
+    modifyAction.add_argument('--linkmask', '-l', nargs='*', help='Add link mask corresponding to tower specified (e.g. E12,1)', type=caloTower.initFromString, metavar='tower')
+
+    if db:
+        listAction = subparsers.add_parser('list', help='List masks present in OMDS')
+        readAction = subparsers.add_parser('read', help='Read mask key and do things to it')
+        readAction.add_argument('key')
+        readAction.add_argument('--xml-only', action='store_true', help='Only print XML file, no key information')
+
     args = parser.parse_args()
 
-    db.connect()
+    if db:
+        db.connect()
 
     if args.action == 'list':
         print 'Keys currently in CALOL1_RS table:'
@@ -26,7 +44,62 @@ def main():
             print "Description:", record['description']
             print
         print record['conf']
+    elif args.action == 'modify':
+        document = dom.parse(args.file)
+        run_settings = document.firstChild
+        stripNode(run_settings)
+        if args.linkmask:
+            for tower in args.linkmask:
+                contextId = tower.contextId()
+                linkId = tower.linkMaskId()
+                context = findOrCreateElement(document, run_settings, 'context', contextId)
+                mask = findOrCreateElement(document, context, 'mask', linkId)
+        document.writexml(sys.stdout, indent='', addindent='  ', newl='\n')
 
+
+# The conclusion is this is not kosher
+# http://stackoverflow.com/questions/3310614/remove-whitespaces-in-xml-string
+def stripNode(node, recurse=True):
+    nodesToRemove = []
+    nodeToBeStripped = False
+
+    for childNode in node.childNodes:
+        # list empty text nodes (to remove if any should be)
+        if (childNode.nodeType == Node.TEXT_NODE and childNode.nodeValue.strip(' \t\n') == ""):
+            nodesToRemove.append(childNode)
+
+        # only remove empty text nodes if not a leaf node (i.e. a child element exists)
+        if childNode.nodeType == Node.ELEMENT_NODE:
+            nodeToBeStripped = True
+
+    # remove flagged text nodes
+    if nodeToBeStripped:
+        for childNode in nodesToRemove:
+            node.removeChild(childNode)
+
+    # recurse if specified
+    if recurse:
+        for childNode in node.childNodes:
+            stripNode(childNode, True)
+
+def getId(node):
+    attr = node.attributes.get('id')
+    if not attr:
+        raise Exception("Invalid XML detected! Node %s has no id" % node.tagName)
+    return attr.value
+
+def findOrCreateElement(document, parent, tag, id):
+    all = parent.getElementsByTagName(tag)
+    selected = filter(lambda el: getId(el) == id, all)
+    if len(selected) == 0:
+        new = document.createElement(tag)
+        new.setAttribute('id', id)
+        parent.appendChild(new)
+        return new
+    elif len(selected) == 1:
+        return selected[0]
+    else:
+        raise Exception("Invalid XML detected! More than one element type %s with id %s" % (tag, id))
 
 if __name__ == '__main__':
     main()
