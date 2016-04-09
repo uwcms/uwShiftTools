@@ -1,42 +1,50 @@
 #!/usr/bin/env python
 import argparse
-from calol1 import caloTower
+from calol1.caloTower import caloTower
 import sys
 from xml.dom import minidom as dom
 from xml.dom import Node
-from xml.dom.ext import PrettyPrint
 
 try:
-    import calol1.omds as db
+    import calol1.omds
 except ImportError:
     print "Could not load OMDS library, going into offline mode."
     print "Note: OMDS only available from P5 machines"
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Reads L1 Calo Masks from OMDS')
+    parser = argparse.ArgumentParser(
+        description='Reads L1 Calo Masks from OMDS'
+    )
     subparsers = parser.add_subparsers(help='sub-command help', dest='action')
+
     modifyAction = subparsers.add_parser('modify', help='Modify xml mask file')
     modifyAction.add_argument('file', type=argparse.FileType('r'))
-    modifyAction.add_argument('--linkmask', '-l', nargs='*', help='Add link mask corresponding to tower specified (e.g. E12,1)', type=caloTower.initFromString, metavar='tower')
+    modifyAction.add_argument(
+        '--linkmask',
+        '-l',
+        nargs='*',
+        help='Add link mask corresponding to tower specified (e.g. E12,1)',
+        type=caloTower.initFromString,
+        metavar='tower'
+    )
 
-    if db:
+    if 'calol1.omds' in sys.modules:
         listAction = subparsers.add_parser('list', help='List masks present in OMDS')
+        listAction.add_argument('--limit', type=int, help='TODO! Limit number of keys returned')
         readAction = subparsers.add_parser('read', help='Read mask key and do things to it')
         readAction.add_argument('key')
         readAction.add_argument('--xml-only', action='store_true', help='Only print XML file, no key information')
+        calol1.omds.connect()
 
     args = parser.parse_args()
 
-    if db:
-        db.connect()
-
     if args.action == 'list':
         print 'Keys currently in CALOL1_RS table:'
-        for key in db.list_rs_keys():
+        for key in calol1.omds.list_rs_keys():
             print key
     elif args.action == 'read':
-        record = db.get_rs_key(args.key)
+        record = calol1.omds.get_rs_key(args.key)
         if not args.xml_only:
             print "Key:        ", record['id']
             print "Created on: ", record['creation_date'].strftime('%c')
@@ -53,7 +61,7 @@ def main():
                 contextId = tower.contextId()
                 linkId = tower.linkMaskId()
                 context = findOrCreateElement(document, run_settings, 'context', contextId)
-                mask = findOrCreateElement(document, context, 'mask', linkId)
+                findOrCreateElement(document, context, 'mask', linkId)
         document.writexml(sys.stdout, indent='', addindent='  ', newl='\n')
 
 
@@ -82,11 +90,13 @@ def stripNode(node, recurse=True):
         for childNode in node.childNodes:
             stripNode(childNode, True)
 
+
 def getId(node):
     attr = node.attributes.get('id')
     if not attr:
         raise Exception("Invalid XML detected! Node %s has no id" % node.tagName)
     return attr.value
+
 
 def findOrCreateElement(document, parent, tag, id):
     all = parent.getElementsByTagName(tag)
@@ -100,6 +110,7 @@ def findOrCreateElement(document, parent, tag, id):
         return selected[0]
     else:
         raise Exception("Invalid XML detected! More than one element type %s with id %s" % (tag, id))
+
 
 if __name__ == '__main__':
     main()

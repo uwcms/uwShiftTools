@@ -3,6 +3,7 @@ import os as _os
 
 dbConnection = None
 
+
 def connect():
     '''
         Setup a database connection to OMDS
@@ -14,13 +15,15 @@ def connect():
         raise Exception("Cannot open password file for database connection")
     with open(pwPath) as pwfile:
         pw = pwfile.read().strip()
-    dbConnection = _ora.connect('{user}/{pw}@CMS_OMDS_LB'.format(user=user,pw=pw))
+    dbConnection = _ora.connect('{user}/{pw}@CMS_OMDS_LB'.format(user=user, pw=pw))
+
 
 def list_rs_keys():
     cur = dbConnection.cursor()
     cur.execute("select id from cms_trg_l1_conf.calol1_rs order by creation_date desc")
     for row in cur:
         yield row[0]
+
 
 def get_rs_key(key):
     cur = dbConnection.cursor()
