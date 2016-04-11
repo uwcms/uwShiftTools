@@ -36,20 +36,51 @@ class caloTower:
             raise error("Malformed caloTower string: %s.  iEta out of bounds (1-72)" % string)
         return caloTower(caloType, ieta, iphi)
 
+    def lphi(self):
+        '''
+        From Layer-1 point of view, entire calo rotated by +2 (mod 72) in phi
+        All measurements for Layer 1 card and subcard tower indexing are based
+        on this coordinate rather than calorimeter iphi
+        '''
+        lphi = (self._iphi + 1) % 72 + 1
+        return lphi
+
+    def card(self):
+        card = self.lphi() / 4
+        if card < 0 or card > 17:
+            raise Exception("Invalid card (%d) while trying to find context for tower: %s" % (card, str(self)))
+        return card
+
+    def towerOffset(self):
+        '''
+        Despite the strangeness with ECAL links,
+        the tower offset is consistent for them.
+        That implies there are a few impossible link+tower combinations.
+        '''
+        eta = abs(self._ieta)
+        if eta < 29:
+            nibble = (eta - 1) % 2
+            localPhi = self.lphi() % 4
+            offset = nibble * 4 + localPhi
+        elif eta < 40:
+            offset = eta - 30
+        else:
+            offset = 10
+        return offset
+
     def contextId(self):
-        lphi = (self._iphi + 1) % 72 + 1  # Layer1 Phi (old RCT/GCT Phi)
-        if lphi < 0 or lphi > 17:
-            raise Exception("Invalid lphi (%d) while trying to find context for tower: %s" % (lphi, str(self)))
-        return "CTP7_Phi%d" % lphi
+        return "CTP7_Phi%d" % self.card()
 
-    def linkMaskId(self):
-        side = 'Pos'
-        if self._ieta < 0:
-            side = 'Neg'
-
+    def linkOffset(self):
+        '''
+        Within the card, ECAL Links carry two strips of 4 phi, except
+        for links 8,9,11,13 (zero-indexed) which only have one phi strip
+        HCAL is consistent
+        HF is weird, there are 'A' and 'B' links (0,1)
+        A contains iphi, B contains iphi+2, except for 40 and 41
+        '''
         eta = abs(self._ieta)
         if self._caloType == 'E':
-            calo = 'ECAL'
             if eta < 17:
                 link = (eta - 1) / 2
             elif eta == 17:
@@ -61,19 +92,35 @@ class caloTower:
             else:
                 link = (eta - 1) / 2 + 2
         elif self._caloType == 'H' and abs(self._ieta) < 29:
-            calo = 'HCAL'
-            link = (eta - 1) / 2
+            link = 16 + (eta - 1) / 2
         else:
-            calo = 'HF'
             if (eta < 40) and (self._iphi % 4 == 1):
-                link = 0
+                link = 16 + 14
             elif (eta < 40) and (self._iphi % 4 == 3):
-                link = 1
+                link = 16 + 14 + 1
             elif eta == 40:
-                link = 0
+                link = 16 + 14
             elif eta == 41:
-                link = 1
+                link = 16 + 14 + 1
             else:
                 raise Exception("I should not have gotten here... tower: %s" % str(self))
+        return link
+
+    def linkId(self):
+        side = 'Pos'
+        if self._ieta < 0:
+            side = 'Neg'
+
+        link = self.linkOffset()
+        if link < 16:
+            calo = 'ECAL'
+        elif link < 16 + 14:
+            calo = 'HCAL'
+            link = link - 16
+        elif link < 16 + 14 + 2:
+            calo = 'HF'
+            link = link - 16 - 14
+        else:
+            raise Exception("I should not have gotten here... link: %d, tower: %s" % (link, str(self)))
 
         return "inputPorts.%s_%s_LINK_%02d" % (side, calo, link)
