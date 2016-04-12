@@ -5,9 +5,11 @@ def arrayToMask(array):
 
 
 def maskToArray(mask):
-    array = mask.split(', ')
+    array = mask.split(',')
     if len(array) != 32:
         raise Exception("Tower mask text length is invalid! (not 32)\n" + mask)
+
+    array = map(lambda s: s.strip(' \n\t'), array)
 
     looksLikeHex = sum(map(lambda x: x[:2] == '0x', array)) == 32
     if not looksLikeHex:

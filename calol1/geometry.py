@@ -40,9 +40,10 @@ class caloTower:
         '''
         From Layer-1 point of view, entire calo rotated by +2 (mod 72) in phi
         All measurements for Layer 1 card and subcard tower indexing are based
-        on this coordinate rather than calorimeter iphi
+        on this coordinate rather than calorimeter iphi.
+        ! 0-indexed !
         '''
-        lphi = (self._iphi + 1) % 72 + 1
+        lphi = (self._iphi + 1) % 72
         return lphi
 
     def card(self):

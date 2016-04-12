@@ -39,12 +39,14 @@ class run_settings():
         context = _util.findOrCreateElement(self.document, self.run_settings, 'context', contextId)
 
         paramPosEta = _util.findOrCreateElement(self.document, context, 'param', 'towerMaskPosEta')
+        paramPosEta.setAttribute('type', 'vector:uint')
         maskPosEta = paramPosEta.firstChild
         if not maskPosEta:
             maskPosEta = self.document.createTextNode(_towerMask.blankMask())
             paramPosEta.appendChild(maskPosEta)
 
         paramNegEta = _util.findOrCreateElement(self.document, context, 'param', 'towerMaskNegEta')
+        paramNegEta.setAttribute('type', 'vector:uint')
         maskNegEta = paramNegEta.firstChild
         if not maskNegEta:
             maskNegEta = self.document.createTextNode(_towerMask.blankMask())
