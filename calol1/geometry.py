@@ -90,6 +90,10 @@ class caloTower:
                 link = 9
             elif eta == 19 or eta == 20:
                 link = 10
+            elif eta == 21:
+                link = 11
+            elif eta == 22:
+                link = 12
             else:
                 link = (eta - 1) / 2 + 2
         elif self._caloType == 'H' and abs(self._ieta) < 29:
