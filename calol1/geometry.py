@@ -99,9 +99,9 @@ class caloTower:
         elif self._caloType == 'H' and abs(self._ieta) < 29:
             link = 16 + (eta - 1) / 2
         else:
-            if (eta < 40) and (self._iphi % 4 == 1):
+            if (eta < 40) and (self._iphi % 4 == 3):
                 link = 16 + 14
-            elif (eta < 40) and (self._iphi % 4 == 3):
+            elif (eta < 40) and (self._iphi % 4 == 1):
                 link = 16 + 14 + 1
             elif eta == 40:
                 link = 16 + 14
