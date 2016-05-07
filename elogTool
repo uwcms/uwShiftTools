@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import argparse
 import datetime
 import sys
 from xml.dom import minidom as dom
@@ -8,7 +7,7 @@ import calol1.xml
 try:
     import calol1.omds
 except ImportError:
-    sys.stderr.write("Could not load OMDS library.")
+    sys.stderr.write("Could not load OMDS library, exiting.\n")
     exit(-1)
 
 calol1.omds.connect(user='cms_trg_r')
@@ -28,7 +27,7 @@ header = columns.format(**{
     'l1rs_calol1_rs_key': 'Layer1 Run Settings',
 })
 print header
-print "="*len(header)
+print "=" * len(header)
 unique_rs_keys = set()
 for key in calol1.omds.current_rs_keys():
     print columns.format(**key)
@@ -45,7 +44,7 @@ for key in unique_rs_keys:
     info.strip()
     if len(info) > 0:
         for line in info.split('\n'):
-            print '    '+line
+            print '    ' + line
     else:
         print '    No masks.'
 
@@ -56,17 +55,17 @@ print
 
 columns = "{rs_runnumber:10} | {rs_triggers:10} | {rs_triggermode:30} | {l1rs_calol1_rs_key:25} | {l1conf_calol1_key:20} | {E} | {H} | {dqm:15}"
 header = columns.format(**{
-    'rs_runnumber':'Run Number',
-    'rs_triggers':'L1A Count',
-    'rs_triggermode':'L1-HLT Key',
-    'l1rs_calol1_rs_key':'Layer1 Run Settings',
-    'l1conf_calol1_key':'Layer1 Config',
-    'E':'E',
-    'H':'H',
-    'dqm':'DQM Feedback',
+    'rs_runnumber': 'Run Number',
+    'rs_triggers': 'L1A Count',
+    'rs_triggermode': 'L1-HLT Key',
+    'l1rs_calol1_rs_key': 'Layer1 Run Settings',
+    'l1conf_calol1_key': 'Layer1 Config',
+    'E': 'E',
+    'H': 'H',
+    'dqm': 'DQM Feedback',
 })
 print header
-print "="*len(header)
+print "=" * len(header)
 for run in calol1.omds.run_summary(toDate=datetime.date.today()):
     run['E'] = 'X'
     run['H'] = 'X'

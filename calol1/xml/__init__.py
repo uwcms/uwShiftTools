@@ -1,6 +1,5 @@
 import util as _util
 import towerMask as _towerMask
-from ..geometry import caloTower
 
 
 class run_settings():
@@ -33,7 +32,7 @@ class run_settings():
             tmp = ''
             empty = True
             contextId = context.getAttribute('id')
-            if contextId  == 'processors':
+            if contextId == 'processors':
                 tmp += 'All processors:\n'
             else:
                 tmp += 'Processor %s:\n' % contextId

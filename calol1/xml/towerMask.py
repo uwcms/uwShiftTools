@@ -1,5 +1,6 @@
 from ..geometry import caloTower
 
+
 def arrayToMask(array):
     if len(array) != 32:
         raise Exception("Tried to pass incorrect array length to mask text?!")

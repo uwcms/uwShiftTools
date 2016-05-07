@@ -5,7 +5,7 @@ import datetime
 dbConnection = None
 
 
-def connect(user = 'cms_calol1'):
+def connect(user='cms_calol1'):
     '''
         Setup a database connection to OMDS
     '''
@@ -61,12 +61,12 @@ def current_rs_keys():
         left join cms_trg_l1_conf.l1_trg_rs_keys l1rs on l1hlt.l1_trg_rs_key = l1rs.id
     """.format(fields=','.join(fields))
     cur.execute(query)
-    fields_underscore = map(lambda s: s.replace('.','_'), fields)
+    fields_underscore = map(lambda s: s.replace('.', '_'), fields)
     for i, row in enumerate(cur):
         yield dict(zip(fields_underscore, row))
 
 
-def run_summary(sinceDate = None, toDate = None, minEvents = 1000, limit = 200):
+def run_summary(sinceDate=None, toDate=None, minEvents=1000, limit=200):
     cur = dbConnection.cursor()
     fields = [
         'rs.runnumber',
@@ -95,7 +95,7 @@ def run_summary(sinceDate = None, toDate = None, minEvents = 1000, limit = 200):
         toDate = datetime.datetime.now()
 
     query = """select {fields}
-        from cms_wbm.runsummary rs 
+        from cms_wbm.runsummary rs
         left join cms_l1_hlt.l1_hlt_conf_upgrade l1hlt on rs.triggermode = l1hlt.id
         left join cms_trg_l1_conf.l1_trg_conf_keys l1conf on l1hlt.l1_trg_conf_key = l1conf.id
         left join cms_trg_l1_conf.l1_trg_rs_keys l1rs on l1hlt.l1_trg_rs_key = l1rs.id
@@ -106,7 +106,7 @@ def run_summary(sinceDate = None, toDate = None, minEvents = 1000, limit = 200):
         order by rs.runnumber desc
     """.format(fields=','.join(fields))
     cur.execute(query, sinceDate=sinceDate, toDate=toDate, minEvents=minEvents)
-    fields_underscore = map(lambda s: s.replace('.','_'), fields)
+    fields_underscore = map(lambda s: s.replace('.', '_'), fields)
     for i, row in enumerate(cur):
         if i < limit:
             yield dict(zip(fields_underscore, row))

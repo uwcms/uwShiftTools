@@ -51,7 +51,7 @@ class caloTower:
         else:
             raise Exception("Invalid mask id (%s) while initializing tower from Link Mask!" % maskId)
 
-        card = int(contextId.replace('CTP7_Phi',''))
+        card = int(contextId.replace('CTP7_Phi', ''))
         if card < 0 or card > 17:
             raise Exception("Invalid card (%d) while initializing tower from Link Mask!" % card)
 
@@ -84,7 +84,7 @@ class caloTower:
         iphi = (lphi + 70) % 72 + 1
 
         try:
-            return caloTower.initFromString('%s%d,%d'%(caloType, ieta, iphi))
+            return caloTower.initFromString('%s%d,%d' % (caloType, ieta, iphi))
         except:
             print "Note: initFromContextMaskLinkOffset called with: contextId=%s, maskId=%s, link=%d, offset=%d" % (contextId, maskId, link, offset)
             raise

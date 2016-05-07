@@ -8,7 +8,7 @@ import calol1.xml
 try:
     import calol1.omds
 except ImportError:
-    sys.stderr.write("Could not load OMDS library, going into offline mode. (this is expected if not in .cms network)\n")
+    pass
 
 
 def main():
