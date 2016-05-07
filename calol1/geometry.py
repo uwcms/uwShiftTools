@@ -36,6 +36,59 @@ class caloTower:
             raise error("Malformed caloTower string: %s.  iEta out of bounds (1-72)" % string)
         return caloTower(caloType, ieta, iphi)
 
+    # For tower masks
+    @staticmethod
+    def initFromContextMaskLinkOffset(contextId, maskId, link, offset):
+        # TODO: make caloTower aware of 'processors' context
+        # For now, pretend it is Phi0 :/
+        if contextId == 'processors':
+            contextId = 'CTP7_Phi0'
+
+        if maskId == 'towerMaskPosEta':
+            etaSide = 1
+        elif maskId == 'towerMaskNegEta':
+            etaSide = -1
+        else:
+            raise Exception("Invalid mask id (%s) while initializing tower from Link Mask!" % maskId)
+
+        card = int(contextId.replace('CTP7_Phi',''))
+        if card < 0 or card > 17:
+            raise Exception("Invalid card (%d) while initializing tower from Link Mask!" % card)
+
+        if link < 0:
+            raise Exception("Invalid link (%d) while initializing tower from Link Mask!" % link)
+        elif link < 30:
+            if link < 16:
+                caloType = 'E'
+                if link > 10:
+                    link -= 2
+                elif link > 8:
+                    link -= 1
+            else:
+                caloType = 'H'
+                link -= 16
+            absEta = 1 + (link * 2) + (offset / 4)
+            ieta = absEta * etaSide
+            localphi = (offset % 4)
+        elif link < 32:
+            caloType = 'H'
+            absEta = 30 + offset
+            localphi = 2 * (link - 30)
+            # Link B offset 10 = absEta 41
+            if link == 31 and offset == 10:
+                absEta = 41
+                localphi = 0
+            ieta = absEta * etaSide
+
+        lphi = card * 4 + localphi
+        iphi = (lphi + 70) % 72 + 1
+
+        try:
+            return caloTower.initFromString('%s%d,%d'%(caloType, ieta, iphi))
+        except:
+            print "Note: initFromContextMaskLinkOffset called with: contextId=%s, maskId=%s, link=%d, offset=%d" % (contextId, maskId, link, offset)
+            raise
+
     def lphi(self):
         '''
         From Layer-1 point of view, entire calo rotated by +2 (mod 72) in phi

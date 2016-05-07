@@ -1,0 +1,78 @@
+#!/usr/bin/env python
+import argparse
+import datetime
+import sys
+from xml.dom import minidom as dom
+import calol1.xml
+
+try:
+    import calol1.omds
+except ImportError:
+    sys.stderr.write("Could not load OMDS library.")
+    exit(-1)
+
+calol1.omds.connect(user='cms_trg_r')
+
+print "Calls:"
+print
+
+
+print
+print "Current valid keys:"
+print
+
+columns = "{l1hlt_l1_hlt_mode:20} | {l1hlt_id:30} | {l1rs_calol1_rs_key:30}"
+header = columns.format(**{
+    'l1hlt_l1_hlt_mode': 'Run Mode',
+    'l1hlt_id': 'L1-HLT Key',
+    'l1rs_calol1_rs_key': 'Layer1 Run Settings',
+})
+print header
+print "="*len(header)
+unique_rs_keys = set()
+for key in calol1.omds.current_rs_keys():
+    print columns.format(**key)
+    unique_rs_keys.add(key['l1rs_calol1_rs_key'])
+print
+for key in unique_rs_keys:
+    print "Mask summary for %s:" % key
+    linkmasks, towermasks = calol1.omds.get_mask_xml(key)
+    info = ''
+    for masks in [linkmasks, towermasks]:
+        document = dom.parseString(masks.read())
+        run_settings = calol1.xml.run_settings(document)
+        info += str(run_settings)
+    info.strip()
+    if len(info) > 0:
+        for line in info.split('\n'):
+            print '    '+line
+    else:
+        print '    No masks.'
+
+print
+print
+print "Today's runs:"
+print
+
+columns = "{rs_runnumber:10} | {rs_triggers:10} | {rs_triggermode:30} | {l1rs_calol1_rs_key:25} | {l1conf_calol1_key:20} | {E} | {H} | {dqm:15}"
+header = columns.format(**{
+    'rs_runnumber':'Run Number',
+    'rs_triggers':'L1A Count',
+    'rs_triggermode':'L1-HLT Key',
+    'l1rs_calol1_rs_key':'Layer1 Run Settings',
+    'l1conf_calol1_key':'Layer1 Config',
+    'E':'E',
+    'H':'H',
+    'dqm':'DQM Feedback',
+})
+print header
+print "="*len(header)
+for run in calol1.omds.run_summary(toDate=datetime.date.today()):
+    run['E'] = 'X'
+    run['H'] = 'X'
+    if run['rs_ecal_status'] != 2:
+        run['E'] = ' '
+    if run['rs_hcal_status'] != 2:
+        run['H'] = ' '
+    run['dqm'] = ''
+    print columns.format(**run).rstrip()

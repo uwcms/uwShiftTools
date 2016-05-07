@@ -77,7 +77,11 @@ def main():
             print "Created by: ", record['author']
             print "Description:", record['description']
             print
-        print record['conf']
+            document = dom.parseString(record['conf'].read())
+            run_settings = calol1.xml.run_settings(document)
+            print run_settings
+        else:
+            print record['conf']
         return
     # TODO: theoretically possible
     # if args.action == 'write':

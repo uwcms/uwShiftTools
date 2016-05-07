@@ -1,5 +1,6 @@
 import util as _util
 import towerMask as _towerMask
+from ..geometry import caloTower
 
 
 class run_settings():
@@ -26,7 +27,35 @@ class run_settings():
         self.run_settings = run_settings
 
     def __str__(self):
-        print 'Debug output, TODO'
+        out = ''
+        contexts = self.run_settings.getElementsByTagName('context')
+        for context in contexts:
+            tmp = ''
+            empty = True
+            contextId = context.getAttribute('id')
+            if contextId  == 'processors':
+                tmp += 'All processors:\n'
+            else:
+                tmp += 'Processor %s:\n' % contextId
+
+            masks = context.getElementsByTagName('mask')
+            for mask in masks:
+                empty = False
+                tmp += '    Masked link: %s\n' % mask.getAttribute('id')
+
+            params = context.getElementsByTagName('param')
+            for param in params:
+                maskId = param.getAttribute('id')
+                if 'towerMask' in maskId:
+                    mask = param.firstChild
+                    maskedTowers = _towerMask.describe(contextId, maskId, mask)
+                    if len(maskedTowers) > 0:
+                        empty = False
+                        tmp += '    Masked tower(s): %s\n' % maskedTowers
+
+            if not empty:
+                out += tmp
+        return out
 
     def addLinkMaskByTower(self, tower):
         contextId = tower.contextId()

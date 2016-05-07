@@ -1,3 +1,5 @@
+from ..geometry import caloTower
+
 def arrayToMask(array):
     if len(array) != 32:
         raise Exception("Tried to pass incorrect array length to mask text?!")
@@ -29,3 +31,21 @@ def addTower(mask, tower):
     t = tower.towerOffset()
     array[link] |= (1 << t)
     mask.replaceWholeText(arrayToMask(array))
+
+
+def readTowers(contextId, maskId, mask):
+    array = maskToArray(mask.wholeText)
+    towersMasked = []
+    for link in range(32):
+        maxOffset = 8
+        if link >= 30:
+            maxOffset = 11
+        for offset in range(maxOffset):
+            if array[link] & (1 << offset):
+                towersMasked.append(caloTower.initFromContextMaskLinkOffset(contextId, maskId, link, offset))
+    return towersMasked
+
+
+def describe(contextId, maskId, mask):
+    towers = readTowers(contextId, maskId, mask)
+    return ' '.join(map(str, towers))
