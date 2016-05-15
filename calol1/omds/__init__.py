@@ -87,12 +87,12 @@ def run_summary(sinceDate=None, toDate=None, minEvents=1000, limit=200):
         'calol1rs.author',
     ]
 
-    if not sinceDate:
-        # Default: yesterday
-        sinceDate = datetime.date.today() - datetime.timedelta(1)
     if not toDate:
         # Default: now
         toDate = datetime.datetime.now()
+    if not sinceDate:
+        # Default: toDate - day
+        sinceDate = toDate - datetime.timedelta(1)
 
     query = """select {fields}
         from cms_wbm.runsummary rs
