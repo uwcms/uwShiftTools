@@ -69,9 +69,9 @@ print "=" * len(header)
 for run in calol1.omds.run_summary(toDate=datetime.date.today()):
     run['E'] = 'X'
     run['H'] = 'X'
-    if run['rs_ecal_status'] != 2:
+    if run['rs_ecal_present'] != 1:
         run['E'] = ' '
-    if run['rs_hcal_status'] != 2:
+    if run['rs_hcal_present'] != 1:
         run['H'] = ' '
     run['dqm'] = ''
     print columns.format(**run).rstrip()

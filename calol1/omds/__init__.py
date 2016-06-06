@@ -74,8 +74,8 @@ def run_summary(sinceDate=None, toDate=None, minEvents=1000, limit=200):
         'rs.triggers',
         'rs.events',
         'rs.lhcfill',
-        'rs.ecal_status',
-        'rs.hcal_status',
+        'rs.ecal_present',
+        'rs.hcal_present',
         'rs.tier0_transfer',
         'rs.triggermode',
         'l1hlt.l1_trg_conf_key',
@@ -100,7 +100,7 @@ def run_summary(sinceDate=None, toDate=None, minEvents=1000, limit=200):
         left join cms_trg_l1_conf.l1_trg_conf_keys l1conf on l1hlt.l1_trg_conf_key = l1conf.id
         left join cms_trg_l1_conf.l1_trg_rs_keys l1rs on l1hlt.l1_trg_rs_key = l1rs.id
         left join cms_trg_l1_conf.calol1_rs_keys calol1rs on l1rs.calol1_rs_key = calol1rs.id
-        where rs.username = 'toppro' and rs.trg_status = 2
+        where rs.username = 'toppro' and rs.trg_present = 1
             and rs.starttime between :sinceDate and :toDate
             and rs.events > :minEvents
         order by rs.runnumber desc
