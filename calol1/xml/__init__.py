@@ -63,6 +63,20 @@ class run_settings():
         _util.findOrCreateElement(self.document, context, 'mask', linkId)
 
     def addTowerMaskByTower(self, tower):
+        # if there's no base mask for all processors, make one
+        allProcessors = _util.findOrCreateElement(self.document, self.run_settings, 'context', 'processors')
+        paramsAll = allProcessors.getElementsByTagName('param')
+        for side in ['Pos', 'Neg']:
+            for p in paramsAll:
+                if 'towerMask{}Eta'.format(side) in _util.getId(p):
+                    break
+            else:
+                # no default mask, make one
+                paramAll = _util.findOrCreateElement(self.document, allProcessors, 'param', 'towerMask{}Eta'.format(side))
+                paramAll.setAttribute('type', 'vector:uint')
+                maskAll = self.document.createTextNode(_towerMask.blankMask())
+                paramAll.appendChild(maskAll)
+
         contextId = tower.contextId()
         context = _util.findOrCreateElement(self.document, self.run_settings, 'context', contextId)
 
