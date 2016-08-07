@@ -76,8 +76,6 @@ class run_settings():
                 paramAll.setAttribute('type', 'vector:uint')
                 maskAll = self.document.createTextNode(_towerMask.blankMask())
                 paramAll.appendChild(maskAll)
-            
-            
 
         contextId = tower.contextId()
         context = _util.findOrCreateElement(self.document, self.run_settings, 'context', contextId)
