@@ -1,4 +1,10 @@
-import cx_Oracle as _ora
+try:
+    import cx_Oracle as _ora
+except ImportError:
+    print "ERROR: Could not load cx_Oracle library necessary for OMDS database queries"
+    print "       Suggestion: check that you have CMSSW environment or otherwise find"
+    print "       a method to add cx_Oracle to your python path."
+    raise
 import os as _os
 import datetime
 
@@ -10,6 +16,9 @@ def connect(user='cms_calol1'):
         Setup a database connection to OMDS
     '''
     global dbConnection
+    if user == 'cms_trg_r':
+        dbConnection = _ora.connect('cms_trg_r/X3lmdvu4@cms_omds_adg')
+        return
     pwPath = '/nfshome0/centraltspro/secure/%s.txt' % user
     if not _os.path.exists(pwPath):
         raise Exception("Cannot open password file for database connection")
