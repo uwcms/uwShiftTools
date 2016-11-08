@@ -4,6 +4,29 @@ import sys
 from xml.dom import minidom as dom
 import calol1.xml
 
+from argparse import ArgumentParser
+
+parser = ArgumentParser(description=('Create an Elog template listing current '
+                                     'valid keys, current masks, and runs that '
+                                     'happened over a designated period'))
+parser.add_argument('--startNDaysAgo', type=int, default=1,
+                    help=('Run list will start at the beginning of the day '
+                          'this many days ago (default 1, i.e. start '
+                          'at the beginning of yesterday).'))
+parser.add_argument('--endNDaysAgo', type=int, default=0,
+                    help=('Run list will end at the beginning of the day this '
+                          'many days ago (default 0, i.e. end just before '
+                          'today). Negative values print everything up to '
+                          'now.'))
+args = parser.parse_args()
+
+if args.endNDaysAgo < 0:
+    endTime = datetime.datetime.now()
+    startTime = datetime.date.today() - datetime.timedelta(max(args.startNDaysAgo, 0))
+else:
+    endTime = datetime.date.today() - datetime.timedelta(args.endNDaysAgo)
+    startTime = datetime.date.today() - datetime.timedelta(max(args.startNDaysAgo, args.endNDaysAgo+1))
+
 try:
     import calol1.omds
 except ImportError:
@@ -66,7 +89,7 @@ header = columns.format(**{
 })
 print header
 print "=" * len(header)
-for run in calol1.omds.run_summary(toDate=datetime.date.today()):
+for run in calol1.omds.run_summary(toDate=endTime, sinceDate=startTime):
     run['E'] = 'X'
     run['H'] = 'X'
     if run['rs_ecal_present'] != 1:
