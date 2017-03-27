@@ -50,8 +50,8 @@ def get_mask_xml(rs_key):
     query = """
         select link_masks.conf, tower_masks.conf
         from cms_trg_l1_conf.calol1_rs_keys rs_keys
-        left join cms_trg_l1_conf.calol1_rs link_masks on rs_keys.link_masks = link_masks.id
-        left join cms_trg_l1_conf.calol1_rs tower_masks on rs_keys.tower_masks = tower_masks.id
+        left join cms_trg_l1_conf.calol1_clobs link_masks on rs_keys.link_masks = link_masks.id
+        left join cms_trg_l1_conf.calol1_clobs tower_masks on rs_keys.tower_masks = tower_masks.id
         where rs_keys.id=:id
     """
     cur.execute(query, id=rs_key)
@@ -105,7 +105,7 @@ def run_summary(sinceDate=None, toDate=None, minEvents=1000, limit=200):
 
     query = """select {fields}
         from cms_wbm.runsummary rs
-        left join cms_l1_hlt.l1_hlt_conf_upgrade l1hlt on rs.triggermode = l1hlt.id
+        left join cms_l1_hlt.l1_hlt_conf l1hlt on rs.triggermode = l1hlt.id
         left join cms_trg_l1_conf.l1_trg_conf_keys l1conf on l1hlt.l1_trg_conf_key = l1conf.id
         left join cms_trg_l1_conf.l1_trg_rs_keys l1rs on l1hlt.l1_trg_rs_key = l1rs.id
         left join cms_trg_l1_conf.calol1_rs_keys calol1rs on l1rs.calol1_rs_key = calol1rs.id
