@@ -5,15 +5,10 @@ from xml.dom import minidom as dom
 from calol1.geometry import caloTower
 import calol1.xml
 
-try:
-    import calol1.omds
-except ImportError:
-    pass
-
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Reads L1 Calo Masks from OMDS'
+        description='Generates CaloLayer1 masks for use in L1CE'
     )
     subparsers = parser.add_subparsers(help='sub-command help', dest='action')
     createAction = subparsers.add_parser('create', help='Create new xml mask file')
@@ -53,38 +48,7 @@ def main():
         metavar='tower'
     )
 
-    if 'calol1.omds' in sys.modules:
-        listAction = subparsers.add_parser('list', help='List masks present in OMDS')
-        listAction.add_argument('--limit', type=int, help='TODO! Limit number of keys returned')
-        readAction = subparsers.add_parser('read', help='Read mask key and do things to it')
-        readAction.add_argument('key')
-        readAction.add_argument('--xml-only', action='store_true', help='Only print XML file, no key information')
-        calol1.omds.connect()
-
     args = parser.parse_args()
-
-    # Online-only actions
-    if args.action == 'list':
-        print 'Keys currently in CALOL1_RS table:'
-        for key in calol1.omds.list_rs_keys():
-            print key
-        return
-    if args.action == 'read':
-        record = calol1.omds.get_rs_key(args.key)
-        if not args.xml_only:
-            print "Key:        ", record['id']
-            print "Created on: ", record['creation_date'].strftime('%c')
-            print "Created by: ", record['author']
-            print "Description:", record['description']
-            print
-            document = dom.parseString(record['conf'].read())
-            run_settings = calol1.xml.run_settings(document)
-            print run_settings
-        else:
-            print record['conf']
-        return
-    # TODO: theoretically possible
-    # if args.action == 'write':
 
     if args.action == 'modify':
         document = dom.parse(args.file)
