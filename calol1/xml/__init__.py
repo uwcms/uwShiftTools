@@ -68,11 +68,11 @@ class run_settings():
         paramsAll = allProcessors.getElementsByTagName('param')
         for side in ['Pos', 'Neg']:
             for p in paramsAll:
-                if 'towerMask{}Eta'.format(side) in _util.getId(p):
+                if 'towerMask{0}Eta'.format(side) in _util.getId(p):
                     break
             else:
                 # no default mask, make one
-                paramAll = _util.findOrCreateElement(self.document, allProcessors, 'param', 'towerMask{}Eta'.format(side))
+                paramAll = _util.findOrCreateElement(self.document, allProcessors, 'param', 'towerMask{0}Eta'.format(side))
                 paramAll.setAttribute('type', 'vector:uint')
                 maskAll = self.document.createTextNode(_towerMask.blankMask())
                 paramAll.appendChild(maskAll)
