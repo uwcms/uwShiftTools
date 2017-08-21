@@ -3,7 +3,7 @@ try:
 except ImportError:
     print "ERROR: Could not load cx_Oracle library necessary for OMDS database queries"
     print "       Suggestion: check that you have CMSSW environment or otherwise find"
-    print "       a method to add cx_Oracle to your python path."
+    print "       a method to add the cx_Oracle package to your python path."
     raise
 import os as _os
 import datetime
@@ -11,11 +11,16 @@ import datetime
 dbConnection = None
 
 
-def connect(user='cms_calol1'):
+def connect(user='cms_trg_r'):
     '''
         Setup a database connection to OMDS
     '''
     global dbConnection
+    # Check we have tnsnames.ora
+    if not 'TNS_ADMIN' in _os.environ or _os.environ['TNS_ADMIN'] == '/etc':
+        if not _os.path.exists('/afs/cern.ch/'):
+            raise Exception("Missing tnsnames.ora and don't know how to get it (since /afs/cern.ch isn't available)")
+        _os.environ['TNS_ADMIN'] = '/afs/cern.ch/project/oracle/admin/'
     if user == 'cms_trg_r':
         dbConnection = _ora.connect('cms_trg_r/X3lmdvu4@cms_omds_adg')
         return
