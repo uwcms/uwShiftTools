@@ -37,8 +37,8 @@ calol1.omds.connect(user='cms_trg_r')
 
 print "Calls:"
 print
-
-
+print "DQM Status:"
+print
 print
 print "Current valid keys:"
 print
