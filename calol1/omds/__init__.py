@@ -92,6 +92,7 @@ def run_summary(sinceDate=None, toDate=None, minEvents=10000, limit=200):
         'rs.hcal_present',
         'rs.tier0_transfer',
         'rs.triggermode',
+        'fedstring.value',
         'l1hlt.l1_trg_conf_key',
         'l1hlt.l1_trg_rs_key',
         'l1conf.calol1_key',
@@ -114,7 +115,10 @@ def run_summary(sinceDate=None, toDate=None, minEvents=10000, limit=200):
         left join cms_trg_l1_conf.l1_trg_conf_keys l1conf on l1hlt.l1_trg_conf_key = l1conf.id
         left join cms_trg_l1_conf.l1_trg_rs_keys l1rs on l1hlt.l1_trg_rs_key = l1rs.id
         left join cms_trg_l1_conf.calol1_rs_keys calol1rs on l1rs.calol1_rs_key = calol1rs.id
+        left join cms_runinfo.runsession_parameter rp on rs.runnumber = rp.runnumber
+        left join cms_runinfo.runsession_string fedstring on rp.id = fedstring.runsession_parameter_id
         where rs.username = 'toppro' and rs.trg_present = 1
+            and rp.name = 'CMS.LVL0:FED_ENABLE_MASK'
             and rs.starttime between :sinceDate and :toDate
             and rs.triggers > :minEvents
         order by rs.runnumber desc

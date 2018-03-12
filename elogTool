@@ -3,6 +3,7 @@ import datetime
 import sys
 from xml.dom import minidom as dom
 import calol1.xml
+from calol1.fedvector import fedvector
 
 from argparse import ArgumentParser
 
@@ -76,25 +77,24 @@ print
 print "Today's runs:"
 print
 
-columns = "{rs_runnumber:10} | {rs_triggers:10} | {rs_triggermode:30} | {l1rs_calol1_rs_key:25} | {l1conf_calol1_key:20} | {E} | {H} | {dqm:15}"
+columns = "{rs_runnumber:10} | {rs_triggers:10} | {rs_triggermode:30} | {l1rs_calol1_rs_key:25} | {l1conf_calol1_key:20} | {ECal:^9} | {HCal:^9} | {dqm:15}"
 header = columns.format(**{
     'rs_runnumber': 'Run Number',
     'rs_triggers': 'L1A Count',
     'rs_triggermode': 'L1-HLT Key',
     'l1rs_calol1_rs_key': 'Layer1 Run Settings',
     'l1conf_calol1_key': 'Layer1 Config',
-    'E': 'E',
-    'H': 'H',
+    'ECal': 'ECal FEDs',
+    'HCal': 'HCal FEDs',
     'dqm': 'DQM Feedback',
 })
 print header
 print "=" * len(header)
 for run in calol1.omds.run_summary(toDate=endTime, sinceDate=startTime):
-    run['E'] = 'X'
-    run['H'] = 'X'
-    if run['rs_ecal_present'] != 1:
-        run['E'] = ' '
-    if run['rs_hcal_present'] != 1:
-        run['H'] = ' '
+    feds = fedvector(run['fedstring_value'])
+    if feds.calol1_presence() != '3/3':
+        continue
+    run['ECal'] = feds.ecal_presence()
+    run['HCal'] = feds.hcal_presence()
     run['dqm'] = ''
     print columns.format(**run).rstrip()
