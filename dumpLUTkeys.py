@@ -25,5 +25,6 @@ for row in cur:
     name, time, clob, desc, firstrun, firstrun_time = row
     clobstr = clob.read()
     p = clobstr.find("md5checksum")
-    cksum = clobstr[p+27:p+27+32]
-    print "| %20s | %32s | %10s | %7d | %10s | %s |" % (name, cksum, time.strftime("%Y-%m-%d"), firstrun, firstrun_time.strftime("%Y-%m-%d"), desc.replace("\n", " "))
+    cksum = clobstr[p+27:p+27+32].strip('</p')  # strip because of bug in old keys where not exactly 32 characters
+    cksum = '=%s=' % cksum  # for nice TWiki formatting
+    print "| %20s | %34s | %10s | %7d | %10s | %s |" % (name, cksum, time.strftime("%Y-%m-%d"), firstrun, firstrun_time.strftime("%Y-%m-%d"), desc.replace("\n", " "))
