@@ -22,7 +22,7 @@ def connect(user='cms_trg_r'):
             raise Exception("Missing tnsnames.ora and don't know how to get it (since /afs/cern.ch isn't available)")
         _os.environ['TNS_ADMIN'] = '/afs/cern.ch/project/oracle/admin/'
     if user == 'cms_trg_r':
-        dbConnection = _ora.connect('cms_trg_r/X3lmdvu4@cms_omds_adg')
+        dbConnection = _ora.connect('cms_trg_r/trMq=3aS@cms_omds_adg')
         return
     pwPath = '/nfshome0/centraltspro/secure/%s.txt' % user
     if not _os.path.exists(pwPath):
